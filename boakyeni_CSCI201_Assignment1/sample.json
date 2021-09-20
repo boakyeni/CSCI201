@@ -1,0 +1,26 @@
+[
+  {
+    "chiralFrequency": 1,
+    "timefall": false,
+    "guid": "c4c62388-98a2-4240-8a6b-5a352e05b5fb",
+    "name": "Geekular Shelter",
+    "phone": "+1 (988) 523-2394",
+    "address": "462 Temple Court, Calverton, United Cities of America, 8728"
+  },
+  {
+    "chiralFrequency": 3,
+    "timefall": false,
+    "guid": "f2ac81a3-dca4-4c3f-a7c4-193e32fc7b9e",
+    "name": "Maineland Shelter",
+    "phone": "+1 (804) 504-2189",
+    "address": "977 Bay Street, Duryea, United Cities of America, 3695"
+  },
+  {
+    "chiralFrequency": 4,
+    "timefall": true,
+    "guid": "9125ab11-db16-4c2e-b84f-fdd504cb6d64",
+    "name": "Dreamia Shelter",
+    "phone": "+1 (827) 597-2957",
+    "address": "527 Polhemus Place, Temperanceville, United Cities of America, 6841"
+  }
+]
