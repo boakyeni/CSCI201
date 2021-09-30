@@ -8,7 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Schedule {
 
-	public static BlockingQueue<Task> schedule;
+	public BlockingQueue<Task> schedule;
 	public static Integer index = 0;
 	private static Lock lock = new ReentrantLock(true);
 	
@@ -19,8 +19,18 @@ public class Schedule {
     public Schedule() {
         schedule = new LinkedBlockingQueue<Task>();
     }
+    public Schedule(ArrayList<Task> sched) {
+    	schedule = new LinkedBlockingQueue<Task>();
+    	for(Task task: sched) {
+    		try {
+				schedule.put(task);
+			} catch (InterruptedException e) {
+				
+			}
+    	}
+    }
     
-    public synchronized static Task get() {
+    public synchronized Task get() {
     	
     	Task ret = new Task(0,null,0);
     	
@@ -36,10 +46,10 @@ public class Schedule {
     	
     }
     
-    public static Task peek() {
-    	synchronized(schedule) {
+    public Task peek() {
+    	//synchronized(schedule) {
     		return schedule.peek();
-    	}
+    	//}
     }
     public void increment() {
     	lock.lock();

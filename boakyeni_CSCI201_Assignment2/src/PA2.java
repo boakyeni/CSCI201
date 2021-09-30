@@ -14,10 +14,12 @@ public class PA2 {
 	private static String companyFile;
 	private static String scheduleFile;
 	private static ArrayList<Stock> stocks = new ArrayList<Stock>();
+	private static ArrayList<ArrayList<Schedule.Task>> uniqueTasks;
 	private static HashMap<Schedule.Task,Semaphore> semaphoreList;
 	private static HashMap<Schedule.Task,Integer> brokerList;
 	private static ArrayList<Trade> traders;
-	private static Schedule sched;
+	private static Schedule schedule;
+	private static ArrayList<Schedule> schedList;
      /**
       * Read Stock Json File inputed by user using GSON
       */
@@ -105,12 +107,13 @@ public class PA2 {
 			System.out.println("The file " + scheduleFile + " has not accepted fields1.\n");
 			readScheduleFile();
 		}
-		
-		Schedule.schedule = new LinkedBlockingQueue<Schedule.Task>();
+		schedule = new Schedule();
+		//called in constructor
+		//schedule.schedule = new LinkedBlockingQueue<Schedule.Task>();
 		for(List<String> trade: tradeList) {
 			//already checked for exception for parseInt
 			try {
-				Schedule.schedule.put(
+				schedule.schedule.put(
 						new Schedule.Task(Integer.parseInt(trade.get(0).replaceAll("[^0-9]", "")),
 						trade.get(1),
 						Integer.parseInt(trade.get(2)))
@@ -124,6 +127,26 @@ public class PA2 {
 				
 			}
 		}
+		
+		/*
+		 * Organize tasks into arrays per company
+		 */
+		uniqueTasks = new ArrayList<>();
+		ArrayList<Schedule.Task> indSched;
+		for(Stock stock: stocks) {
+			indSched = new ArrayList<>();
+			for(Schedule.Task task: schedule.schedule) {
+				if(stock.getTicker().equalsIgnoreCase(task.getTicker())) {
+					indSched.add(task);
+				}
+			}
+			uniqueTasks.add(indSched);
+		}
+		schedList = new ArrayList<>();
+		for(ArrayList<Schedule.Task> ind: uniqueTasks) {
+			schedList.add(new Schedule(ind));
+		}
+		
 		sc.close();
     }
 
@@ -138,7 +161,7 @@ public class PA2 {
     	 * Put into map so that each task has its traders/threads in
     	 * its semaphore and execution can be easier
     	 */
-    	for(Schedule.Task task: Schedule.schedule) {
+    	for(Schedule.Task task: schedule.schedule) {
     		int brokers = (find(task.getTicker()).getStockBrokers());
     		brokerList.put(task, brokers);
     		Semaphore sem = new Semaphore(brokers);
@@ -175,8 +198,18 @@ public class PA2 {
     	*/
     	List<Callable<Object>> callableTasks = new ArrayList<>();
     	for(Map.Entry<Schedule.Task, Semaphore> entry: semaphoreList.entrySet()) {
-    		callableTasks.add(Executors.callable(new Trade(entry.getKey(), entry.getValue())));
-    		
+    		for(int i = 0; i < stocks.size(); i++ ) {
+    			if(uniqueTasks.get(i).size() > 0) {
+    			if(uniqueTasks.get(i).get(0).getTicker().equals(entry.getKey().getTicker())) {
+    				//give trader their unique schedule for company
+    				//order of schedList and uniqueTask should correspond
+    				//this way all traders for the same company operate on same list
+    				callableTasks.add(Executors.callable(new Trade(entry.getKey(), entry.getValue(), schedList.get(i))));
+    			}else {
+    				continue;
+    			}
+    			}
+    		}
     	}
     	try {
     		ex.invokeAll(callableTasks);
@@ -188,7 +221,9 @@ public class PA2 {
 		ex.schedule(new Trade(entry.getKey(), entry.getValue()),val-1,TimeUnit.SECONDS);*/
     	 ex.shutdown();
     	
-    	
+    	 if(ex.isShutdown()) {
+ 			System.out.println("All trades completed!");
+ 		}
     	
     	
     	

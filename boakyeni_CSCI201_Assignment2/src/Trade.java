@@ -7,21 +7,23 @@ public class Trade extends Thread {
 	
 	private Schedule.Task company;
 	private Semaphore sem;
+	private Schedule sched;
 	
 	public Trade() {
 		
 	}
 
-	public Trade(Schedule.Task company, Semaphore sem) {
+	public Trade(Schedule.Task company, Semaphore sem, Schedule sched) {
 		this.company = company;
 		this.sem = sem;
+		this.sched = sched;
     }
 
 	/**
 	 * Trading function using locks
 	 */
 	public void run() {
-		while(!Schedule.schedule.isEmpty()) {
+		while(!sched.schedule.isEmpty()) {
 		try {
 			
 				/*
@@ -29,7 +31,7 @@ public class Trade extends Thread {
 				 * trade
 				 */
 				
-				Integer numStocks = Schedule.peek().getNumOfStock();
+				Integer numStocks = sched.peek().getNumOfStock();
 				// purchase of selling stock
 				String purSell;
 				if(numStocks < 0) {
@@ -46,7 +48,7 @@ public class Trade extends Thread {
 				 */
 				String ticker;
 				
-				ticker = Schedule.peek().getTicker();
+				ticker = sched.peek().getTicker();
 				
 				Duration currTime = Duration.between(Utility.getStartInstant(), Instant.now());
 				if(company.getTicker().equals(ticker) 
@@ -54,7 +56,7 @@ public class Trade extends Thread {
 					sem.acquire();
 					System.out.println(Utility.getZeroTimestamp() + " Starting " + purSell + " of "
 						+ Math.abs(numStocks) + " of " + company.getTicker());
-					Schedule.get();
+					sched.get();
 					Thread.sleep(1000);
 					System.out.println(Utility.getZeroTimestamp() + " Finished " + purSell + " of "
 							+ Math.abs(numStocks) + " of " + company.getTicker());
@@ -69,8 +71,6 @@ public class Trade extends Thread {
 			sem.release();
 		}
 		}
-		if(Schedule.schedule.isEmpty()) {
-			System.out.println("All trades completed!");
-		}
+		
 	}
 }
