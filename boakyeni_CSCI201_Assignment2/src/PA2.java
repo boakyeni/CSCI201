@@ -14,19 +14,20 @@ public class PA2 {
 	private static String companyFile;
 	private static String scheduleFile;
 	private static ArrayList<Stock> stocks = new ArrayList<Stock>();
+	private static Map<String, List<Stock>> stocksData;
 	private static ArrayList<ArrayList<Schedule.Task>> uniqueTasks;
 	private static HashMap<Schedule.Task,Semaphore> semaphoreList;
 	private static HashMap<Schedule.Task,Integer> brokerList;
-	private static ArrayList<Trade> traders;
 	private static Schedule schedule;
 	private static ArrayList<Schedule> schedList;
+	private static Integer threadPool = 0;
      /**
       * Read Stock Json File inputed by user using GSON
       */
     private static void readStockFile() {
     	System.out.println("What is the name of the file containing the company information?");
 		Scanner sc = new Scanner(System.in);
-		companyFile = sc.nextLine().trim(); 
+		companyFile = sc.nextLine().trim().toLowerCase(); 
 		Gson gs = new GsonBuilder()
 				.create();
 		JsonReader reader;
@@ -35,11 +36,18 @@ public class PA2 {
 			reader.setLenient(true);
 			stocks = gs.fromJson(reader,
 					new TypeToken<List<Stock>>() {}.getType());
+			//checks for empty
+			for(Stock st: stocks) {
+				if(st.getTicker().length() == 0 || st.getStockBrokers() == 0
+						|| st.getName().length() == 0) {
+					throw new NullPointerException();
+				}
+			}
 		}catch (FileNotFoundException e) {
 			System.out.println("The file " + companyFile + " could not be found.\n");
 			readStockFile();
 		} catch (JsonParseException ex) {
-			objectReader();
+			objectReader(gs);
 		} catch(NullPointerException ex) {
 			System.out.println("The file " + companyFile + " has empty fields.\n");
 			readStockFile();
@@ -47,26 +55,32 @@ public class PA2 {
 			System.out.println("The file " + companyFile + " has not accepted fields.\n");
 			readStockFile();
 		} 
-			
-			System.out.println(stocks.size());
+		/*
+		 * Thread Pool size is number of total brokers	
+		 */
+		for(Stock stock: stocks) {
+			threadPool+=stock.getStockBrokers();
+		}
     }
     /*
      * Checks if json is json object with array instead of array
      */
-    private static void objectReader() {
+    private static void objectReader(Gson gs) {
     	try {
-    		Gson gson = new Gson();
     		JsonReader reader = new JsonReader(new FileReader(companyFile));
-    		StockList stocklist = gson.fromJson(reader, StockList.class);
-    		stocks = stocklist.getStockList();
+    		stocksData = gs.fromJson(reader, new TypeToken<Map<String, List<Stock>>>() {}.getType());
+    		for(List<Stock> stocklist: stocksData.values()) {
+    			stocks.addAll(stocklist);
+    		}
+    		
     	} catch (FileNotFoundException e) {
 			System.out.println("The file " + companyFile + " could not be found.\n");
 			readStockFile();
     	} catch (JsonParseException ex) {
-			System.out.println("The file " + companyFile + " could not be parsed.\n");
+			System.out.println("The file " + companyFile + " could not be parsed2.\n");
 			readStockFile();
 		} catch(NullPointerException ex) {
-			System.out.println("The file " + companyFile + " has empty fields.\n");
+			System.out.println("The file " + companyFile + " has empty fields2.\n");
 			readStockFile();
 		} catch(IllegalArgumentException ex) {
 			System.out.println("The file " + companyFile + " has not accepted fields.\n");
@@ -84,7 +98,7 @@ public class PA2 {
     	 */
     	System.out.println("What is the name of the file containing the schedule information?");
 		Scanner sc = new Scanner(System.in);
-		scheduleFile = sc.nextLine().trim(); 
+		scheduleFile = sc.nextLine().trim().toLowerCase(); 
 		
 		List<List<String>> tradeList = new ArrayList<>();
 		try {
@@ -115,16 +129,15 @@ public class PA2 {
 			try {
 				schedule.schedule.put(
 						new Schedule.Task(Integer.parseInt(trade.get(0).replaceAll("[^0-9]", "")),
-						trade.get(1),
+						trade.get(1).trim(),
 						Integer.parseInt(trade.get(2)))
 						);
 				
 			} catch (NumberFormatException e) {
-				
-				
+				System.out.println("The file " + scheduleFile + " has not accepted fields.\n");
+	    		readScheduleFile();
 			} catch (InterruptedException e) {
-				
-				
+						
 			}
 		}
 		
@@ -136,11 +149,31 @@ public class PA2 {
 		for(Stock stock: stocks) {
 			indSched = new ArrayList<>();
 			for(Schedule.Task task: schedule.schedule) {
-				if(stock.getTicker().equalsIgnoreCase(task.getTicker())) {
+				if(stock.getTicker().trim().equalsIgnoreCase(task.getTicker().trim())) {
 					indSched.add(task);
+				}	
+			}
+			
+			uniqueTasks.add(indSched);
+		}
+		/*
+		 * check to see if tasks are in companylist
+		 */
+		
+		for(Schedule.Task task: schedule.schedule) {
+			Boolean inList = false;
+			for(Stock stock: stocks) {
+				if(task.getTicker().trim().equalsIgnoreCase(stock.getTicker().trim())) {
+					inList = true;
 				}
 			}
-			uniqueTasks.add(indSched);
+			try {
+			if(inList == false) {
+				throw new IllegalArgumentException();
+			}
+			} catch(IllegalArgumentException e) {
+				System.out.println("Company from schedule not in json");
+			}
 		}
 		schedList = new ArrayList<>();
 		for(ArrayList<Schedule.Task> ind: uniqueTasks) {
@@ -173,89 +206,59 @@ public class PA2 {
      * starts the threads, work is contained within thread
      */
     private static void executeTrades() throws InterruptedException {
-    	traders = new ArrayList<Trade>();
-    	ScheduledExecutorService ex = Executors.newScheduledThreadPool(10);
     	
+    	ScheduledExecutorService ex = Executors.newScheduledThreadPool(threadPool);
     	
-    	/*for(Schedule.Task entry: Schedule.schedule) {
-    		
-    		Semaphore currSemaphore = semaphoreList.get(entry);
-    		//brokerList holds number of threads/traders to make
-    		Integer threadCount = brokerList.get(entry);
-    		ex = Executors.newScheduledThreadPool(threadCount);
-    		//for(int i =0; i < Schedule.schedule.size(); i++) {
-    		ex.schedule(new Trade(entry, currSemaphore), 0, TimeUnit.SECONDS);
-    		    		
-    		//}
-    		
-    		/*for(int i = 0; i < threadCount; i++) {
-    			//traders for a specific company will be indistinguishable
-    			traders.add(new Trade(currTask, currSemaphore));
-    		}
-    		
-    		
-    	}
-    	*/
     	List<Callable<Object>> callableTasks = new ArrayList<>();
     	for(Map.Entry<Schedule.Task, Semaphore> entry: semaphoreList.entrySet()) {
     		for(int i = 0; i < stocks.size(); i++ ) {
     			if(uniqueTasks.get(i).size() > 0) {
-    			if(uniqueTasks.get(i).get(0).getTicker().equals(entry.getKey().getTicker())) {
+    				if(uniqueTasks.get(i).get(0).getTicker().equalsIgnoreCase(entry.getKey().getTicker())) {
     				//give trader their unique schedule for company
     				//order of schedList and uniqueTask should correspond
     				//this way all traders for the same company operate on same list
     				callableTasks.add(Executors.callable(new Trade(entry.getKey(), entry.getValue(), schedList.get(i))));
-    			}else {
-    				continue;
-    			}
+    				}else {
+    					continue;
+    				}
     			}
     		}
     	}
     	try {
     		ex.invokeAll(callableTasks);
-    		
     	} catch(Exception e) {
     		
     	}
-    	/*int val = entry.getKey().getStartTime();
-		ex.schedule(new Trade(entry.getKey(), entry.getValue()),val-1,TimeUnit.SECONDS);*/
     	 ex.shutdown();
-    	
     	 if(ex.isShutdown()) {
  			System.out.println("All trades completed!");
  		}
-    	
-    	
-    	
-    	
-    	
-		
-    	
+
     }
-    
+    /*
+     * Finds stock in data by ticker
+     */
     private static Stock find(String ticker) {
     	Stock returnStock = new Stock();
     	for(Stock stock: stocks) {
-    		if(stock.getTicker().equalsIgnoreCase(ticker)) {
+    		if(stock.getTicker().trim().equalsIgnoreCase(ticker.trim())){
     			returnStock = stock;
     		}
     	}
     	return returnStock;
     }
-    
+    /*
+     * Parses individual lines in csv file
+     */
     private static List<String> getRecordFromLine(String line) throws IllegalArgumentException{
     	List<String> trades = new ArrayList<String>();
     	try {
     		Scanner rs = new Scanner(line);
     		rs.useDelimiter(",");
     		while(rs.hasNext()) {
-    			trades.add(rs.next());
+    			trades.add(rs.next().trim());
     			//System.out.println(trades);
     		}
-    		/*
-    		if(trades.size() < 3) {
-    			throw new IllegalArgumentException();
-    		}*/
     		
     		//make sure time and number of stocks are integers
     		String timestart = trades.get(0).replaceAll("[^0-9]", "");
@@ -267,18 +270,14 @@ public class PA2 {
     			throw new IllegalArgumentException();
     		}
     	}catch(NumberFormatException ex){
-    		System.out.println("The file " + scheduleFile + " has not accepted fields2.\n");
-    		ex.printStackTrace();
+    		System.out.println("The file " + scheduleFile + " has not accepted fields.\n");
     		readScheduleFile();
     	}catch(IllegalArgumentException e){
-    		System.out.println("The file " + scheduleFile + " has not accepted fields3.\n");
+    		System.out.println("The file " + scheduleFile + " has not accepted fields.\n");
     		readScheduleFile();
     	}finally {
     		
     	}
-    		
-    		
-    	
     	return trades;
     }
 

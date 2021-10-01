@@ -1,16 +1,12 @@
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
 
 public class Schedule {
 
 	public BlockingQueue<Task> schedule;
 	public static Integer index = 0;
-	private static Lock lock = new ReentrantLock(true);
 	
     /** 
      * Stock Trades Schedule 
@@ -33,36 +29,18 @@ public class Schedule {
     public synchronized Task get() {
     	
     	Task ret = new Task(0,null,0);
-    	
 			try {
 				ret = schedule.take();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
 			}
-		
-    	
-    	return ret;
-    	
+    	return ret;	
     }
     
     public Task peek() {
-    	//synchronized(schedule) {
-    		return schedule.peek();
-    	//}
+    	return schedule.peek();
     }
-    public void increment() {
-    	lock.lock();
-    	try {
-    		index++;
-    		
-    	} catch(Exception e) {
-    		
-    	} finally {
-    		lock.unlock();
-    	}
-    	
-    }
+    
 
 
     /**

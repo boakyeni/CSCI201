@@ -22,7 +22,19 @@ public class Utility {
 		Duration duration = Duration.between(startInstant, Instant.now());
 		return millisecondsToTimestamp(duration.toMillis());
 	}
-
+	public static String getZeroTimestamp(Duration duration) {
+		
+		return millisecondsToTimestamp(duration.toMillis());
+	}
+	public static String getZeroTimestampPlus() {
+		
+		Duration duration = Duration.between(startInstant, Instant.now());
+		return millisecondsToTimestampPlus(duration.toMillis());
+	}
+	public static String getZeroTimestampPlus(Duration duration) {
+		
+		return millisecondsToTimestampPlus(duration.toMillis());
+	}
 	private static String millisecondsToTimestamp(long millis) {
 		
 		final long hours = TimeUnit.MILLISECONDS.toHours(millis);
@@ -31,6 +43,21 @@ public class Utility {
 				- TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis));
 
 		final long seconds = TimeUnit.MILLISECONDS.toSeconds(millis)
+				- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis));
+
+		final long ms = TimeUnit.MILLISECONDS.toMillis(millis)
+				- TimeUnit.SECONDS.toMillis(TimeUnit.MILLISECONDS.toSeconds(millis));
+
+		return String.format("%02d:%02d:%02d.%02d", hours, minutes, seconds, ms);
+	}
+	private static String millisecondsToTimestampPlus(long millis) {
+		
+		final long hours = TimeUnit.MILLISECONDS.toHours(millis);
+
+		final long minutes = TimeUnit.MILLISECONDS.toMinutes(millis)
+				- TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis));
+
+		final long seconds = TimeUnit.MILLISECONDS.toSeconds(millis)+1
 				- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis));
 
 		final long ms = TimeUnit.MILLISECONDS.toMillis(millis)

@@ -50,16 +50,23 @@ public class Trade extends Thread {
 				
 				ticker = sched.peek().getTicker();
 				
+				
+				//String start = Utility.getZeroTimestamp();
 				Duration currTime = Duration.between(Utility.getStartInstant(), Instant.now());
+				//String end = Utility.getZeroTimestampPlus();
 				if(company.getTicker().equals(ticker) 
 						&& timeCast == currTime.toSeconds() ) {
+					String start = Utility.getZeroTimestamp(currTime);
+					String end = Utility.getZeroTimestampPlus(currTime);
 					sem.acquire();
-					System.out.println(Utility.getZeroTimestamp() + " Starting " + purSell + " of "
+					System.out.println("[" + start + "]" + " Starting " + purSell + " of "
 						+ Math.abs(numStocks) + " of " + company.getTicker());
 					sched.get();
 					Thread.sleep(1000);
-					System.out.println(Utility.getZeroTimestamp() + " Finished " + purSell + " of "
+					//Duration duration = Duration.between(Utility.getStartInstant(), Instant.now());
+					System.out.println("[" + end + "]" + " Finished " + purSell + " of "
 							+ Math.abs(numStocks) + " of " + company.getTicker());
+					
 				} else {
 					//if its not this threads turn let another thread see if its theirs
 					//sem.release();
