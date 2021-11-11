@@ -1,6 +1,6 @@
-package PA3.models;
+package models;
 
-import PA3.util.YelpAPIParser;
+import util.YelpAPIParser;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +17,11 @@ public class DriverInformation {
             String restaurant = info.getRestaurants().get(i);
             String item = info.getItems().get(i);
             Location location = YelpAPIParser.getLocation(restaurant, HQLocation);
+            if(location == null) {
+            	System.out.println("Skipping order of " + item + " from " + restaurant);
+            }else {
             orders.add(new Order(restaurant, item, location, 0));
+            }
         }
         reorder(HQLocation);
     }

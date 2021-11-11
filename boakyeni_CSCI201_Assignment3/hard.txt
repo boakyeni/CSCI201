@@ -1,0 +1,6 @@
+0, Momota Ramen House, black garlic ramen
+1, Daikokuya Little Tokyo, daikoku ramen
+2, Momota Ramen House, spicy miso ramen
+3, Slurpin Ramen Bar, veggie ramen
+4, Daikokuya Little Tokyo, daikoku ramen
+5, Daikokuya Little Tokyo, daikoku ramen

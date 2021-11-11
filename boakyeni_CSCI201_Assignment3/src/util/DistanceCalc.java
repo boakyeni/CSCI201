@@ -1,6 +1,6 @@
-package PA3.util;
+package util;
 
-import PA3.models.Location;
+import models.Location;
 
 public class DistanceCalc {
     public static double getDistance(Location loc1, Location loc2) {

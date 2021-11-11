@@ -1,4 +1,4 @@
-package PA3.models;
+package models;
 
 import java.io.Serializable;
 import java.util.List;

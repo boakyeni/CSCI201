@@ -1,4 +1,4 @@
-package PA3.util;
+package util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,5 +15,8 @@ public class TimeFormatter {
         long duration = System.currentTimeMillis() - startTime;
         return new SimpleDateFormat("HH:mm:ss.SS").format(duration).substring(0, 11);
     }
-
+    
+    public static String getTimeString() {
+    	return new String("[" + getTimestamp() + "]");
+    }
 }

@@ -1,19 +1,20 @@
-package PA3.driver;
+package driver;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
-import PA3.models.DeliveryInformation;
-import PA3.models.DriverInformation;
-import PA3.models.Location;
-import PA3.models.Order;
-import PA3.util.DistanceCalc;
-import PA3.util.TimeFormatter;
+import models.DeliveryInformation;
+import models.DriverInformation;
+import models.Location;
+import models.Order;
+import util.DistanceCalc;
+import util.TimeFormatter;
 
 class DriverShell {
     public static void main(String[] args) {
@@ -42,7 +43,7 @@ class DriverShell {
         in.close();
 
         try {
-            PrintWriter pw = new PrintWriter(s.getOutputStream());
+            ObjectOutputStream pw = new ObjectOutputStream(s.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
             while (true) {
                 Integer num = (Integer) ois.readObject();
@@ -61,11 +62,13 @@ class DriverShell {
                     System.out.println(TimeFormatter.getTimeString() + " All orders completed!");
                     break;
                 }
-
                 DriverInformation driverInfo = new DriverInformation(info);
-                deliver(driverInfo);
+                
+                if(driverInfo != null) {
+                	deliver(driverInfo);
+                } 
 
-                pw.println("done");
+                pw.writeObject("done");
                 pw.flush();
             }
         } catch (SocketException se) {

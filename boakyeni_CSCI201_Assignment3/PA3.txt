@@ -1,0 +1,50 @@
+{
+  "data": [
+    {
+      "name": "Momota Ramen House",
+      "address": "3019 S Figueroa St",
+      "latitude": 34.024840,
+      "longitude": -118.278060,
+      "drivers": 2,
+      "menu": [
+          "black garlic ramen",
+          "spicy miso ramen"
+        ]
+    },
+    {
+      "name": "Daikokuya Little Tokyo",
+      "address": "327 E 1st St",
+      "latitude": 34.049910,
+      "longitude": -118.240180,
+      "drivers": 3,
+      "menu": [
+          "daikoku ramen"
+        ]
+    },
+    {
+      "name": "Tengoku Ramen Bar",
+      "address": "539 S Western Ave",
+      "latitude": 34.064420,
+      "longitude": -118.309150,
+      "drivers": 1,
+      "menu": [
+          "chicken ramen",
+          "tonkotsu ramen",
+          "small chicken ramen"
+        ]
+      
+    },
+    {
+      "name": "Slurpin Ramen Bar",
+      "address": "3500 W 8th St",
+      "latitude": 34.057240,
+      "longitude": -118.30703,
+      "drivers": 1,
+      "menu": [
+          "veggie ramen",
+          "tonkotsu ramen"
+        ]
+      
+    }
+  ]
+}

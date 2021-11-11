@@ -1,6 +1,6 @@
-package PA3.models;
+package models;
 
-import PA3.util.DistanceCalc;
+import util.DistanceCalc;
 
 public class Order {
 

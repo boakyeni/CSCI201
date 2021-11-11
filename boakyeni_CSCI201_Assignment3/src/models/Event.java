@@ -1,4 +1,4 @@
-package PA3.models;
+package models;
 
 public class Event {
 
